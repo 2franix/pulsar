@@ -6,4 +6,7 @@ AC_CONFIG_FILES([
 				 Makefile
 				 src/Makefile
 				 ])
+PKG_CHECK_MODULES([PULSE], [libpulse >= 5],
+				  [AC_SUBST(PULSE_CFLAGS) AC_SUBST(PULSE_LIBS)])
+
 AC_OUTPUT
