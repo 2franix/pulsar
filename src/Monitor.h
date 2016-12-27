@@ -7,14 +7,14 @@ namespace Pulsar
 	class Monitor
 	{
 		public:
-			Monitor();
+			Monitor(pa_mainloop_api *api, const std::string &serverName);
 
 		private:
 			void onContextStateChanged(pa_context *context);
-			//static contextStateChangedCallback(pa_context *context, void *monitor);
+			void onSinkInfo(const pa_sink_info *info);
 
 		private:
-			PulseAudio::Pointer<pa_threaded_mainloop> mainloop;
+			std::string serverName;
 			pa_mainloop_api *mainloopApi;
 
 			/** Connection to the PA server. */
