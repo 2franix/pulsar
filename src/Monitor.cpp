@@ -18,10 +18,7 @@ namespace Pulsar
 		: serverName(serverName), mainloopApi(api), context(nullptr)
 	{
 		this->context = pa_context_new(this->mainloopApi, Application::get().getName().c_str());
-		//pa_context_set_state_callback(this->context, &Monitor::contextStateCallback, this);
-		pa_context_set_state_callback(this->context, [](pa_context *context, void *monitor) {
-				static_cast<Monitor*>(monitor)->onContextStateChanged(context);
-				}, this);
+		pa_context_set_state_callback(this->context, &Monitor::onContextStateChangedCallback, this);
 		//pa_context_connect(this->context, this->serverName.c_str(), PA_CONTEXT_NOAUTOSPAWN, nullptr);
 		pa_context_connect(this->context, nullptr, (pa_context_flags_t)0, nullptr);
 	}
@@ -37,10 +34,15 @@ namespace Pulsar
 					cout << "Pulseaudio connection ready..." << endl;
 					// Connected to Pulseaudio. Now request that sink_info_cb
 					// be called with information about the available sinks.
-					pa_operation *o = pa_context_get_sink_info_by_name(context, "", [](pa_context *context, const pa_sink_info *info, int eol, void *monitor) {
-							static_cast<Monitor*>(monitor)->onSinkInfo(info);
-							}, this);
-					pa_operation_unref(o);
+					pa_operation *o = pa_context_get_sink_info_by_name(context, "", &Monitor::onSinkInfoCallback, this);
+					if (o != nullptr)
+					{
+						pa_operation_unref(o);
+					}
+					else
+					{
+						cout << "Failed to get sink info." << endl;
+					}
 				}
 				break;
 
@@ -72,6 +74,16 @@ namespace Pulsar
 				cout << "Unhandled state for context." << endl;
 				break;
 		}
+	}
+
+	void Monitor::onContextStateChangedCallback(pa_context *context, void *monitor)
+	{
+		static_cast<Monitor*>(monitor)->onContextStateChanged(context);
+	}
+
+	void Monitor::onSinkInfoCallback(pa_context *context, const pa_sink_info *sinkInfo, int eol, void *monitor)
+	{
+		static_cast<Monitor*>(monitor)->onSinkInfo(sinkInfo);
 	}
 
 	void Monitor::onSinkInfo(const pa_sink_info *info)

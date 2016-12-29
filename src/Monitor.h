@@ -12,6 +12,8 @@ namespace Pulsar
 		private:
 			void onContextStateChanged(pa_context *context);
 			void onSinkInfo(const pa_sink_info *info);
+			static void onContextStateChangedCallback(pa_context *context, void *monitor);
+			static void onSinkInfoCallback(pa_context *context, const pa_sink_info *sinkInfo, int eol, void *monitor);
 
 		private:
 			std::string serverName;

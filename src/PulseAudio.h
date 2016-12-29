@@ -14,6 +14,6 @@ namespace Pulsar
 		public:
 			/** Alias for std::unique_ptr dedicated to PA objects that require a
 			 * specific function for disposal. */
-			template <class T> using Pointer = std::unique_ptr<T, std::function<void (T*)>>;
+		template <class T> using Pointer = std::unique_ptr<T, std::function<void (T*)>>;
 	};
 }
