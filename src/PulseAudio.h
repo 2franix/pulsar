@@ -3,6 +3,7 @@
 #include "pulse/context.h"
 #include "pulse/thread-mainloop.h"
 #include "pulse/introspect.h"
+#include "pulse/stream.h"
 
 #include <memory>
 
