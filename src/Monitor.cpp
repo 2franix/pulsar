@@ -15,7 +15,7 @@ using namespace std;
 namespace Pulsar
 {
 	Monitor::Monitor(pa_mainloop_api *api, const string &serverName, const string &sinkName)
-		: serverName(serverName), sinkName(sinkName), mainloopApi(api), context(nullptr), stream(nullptr, pa_stream_unref)
+		: serverName(serverName), sinkName(sinkName), mainloopApi(api), context(nullptr), stream(nullptr, pa_stream_unref), chunkCount(0), chunkSum(0)
 	{
 		this->context = pa_context_new(this->mainloopApi, Application::get().getName().c_str());
 		pa_context_set_state_callback(this->context, &Monitor::onContextStateChangedCallback, this);
@@ -100,19 +100,15 @@ namespace Pulsar
 			pa_stream_peek(this->stream.get(), &data, &readByteCount);
 			if (data != nullptr)
 			{
-				int sum = 0;
 				const int16_t *dataChunks = reinterpret_cast<const int16_t*>(data);
-				for (size_t byteIx = 0; byteIx < readByteCount; byteIx+=2)
+				const size_t currentChunkCount = readByteCount / 2;
+				cout << currentChunkCount << " chunks." << endl;
+				for (size_t chunkIx = 0; chunkIx < currentChunkCount; ++chunkIx)
 				{
-					int16_t chunk = dataChunks[byteIx];				
-					sum += abs(chunk);
+					int16_t chunk = dataChunks[chunkIx];				
+					this->chunkSum += abs(chunk);
 				}
-				sum /= readByteCount / 2; 
-				cout << "Level = " << sum / (double)INT16_MAX * 100.0 << endl;
-			}
-			else
-			{
-				cout << "No data." << endl;
+				this->chunkCount += currentChunkCount;
 			}
 				
 			pa_stream_drop(this->stream.get());
