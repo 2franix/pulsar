@@ -3,13 +3,19 @@
 
 #include "unistd.h"
 
+#include "boost/program_options.hpp" 
+
 #include "Monitor.h"
 
 using namespace std;
 using namespace Pulsar;
+namespace po = boost::program_options;
 
 int main(int argumentCount, char **arguments)
 {
+	po::options_description desc("Allowed options");
+	boost::shared_ptr<po::option_description> helpOption(new po::option_description("help", po::value<int>(), "essai"));
+	desc.add(helpOption);
 	clock_t startTime = clock();
 
 	PulseAudio::Pointer<pa_threaded_mainloop> mainloop(pa_threaded_mainloop_new(), pa_threaded_mainloop_free);
