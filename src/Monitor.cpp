@@ -19,7 +19,7 @@ namespace Pulsar
 	{
 		this->context = pa_context_new(this->mainloopApi, Application::get().getName().c_str());
 		pa_context_set_state_callback(this->context, &Monitor::onContextStateChangedCallback, this);
-		pa_context_connect(this->context, this->serverName.c_str(), PA_CONTEXT_NOAUTOSPAWN, nullptr);
+		pa_context_connect(this->context, this->serverName.empty() ? nullptr : this->serverName.c_str(), PA_CONTEXT_NOAUTOSPAWN, nullptr);
 		//pa_context_connect(this->context, nullptr, (pa_context_flags_t)0, nullptr);
 	}
 
@@ -34,7 +34,7 @@ namespace Pulsar
 					cout << "Pulseaudio connection ready..." << endl;
 					// Connected to Pulseaudio. Now request that sink_info_cb
 					// be called with information about the available sinks.
-					pa_operation *o = pa_context_get_sink_info_by_name(context, this->sinkName.c_str(), &Monitor::onSinkInfoCallback, this);
+					pa_operation *o = pa_context_get_sink_info_by_name(context, this->sinkName.empty() ? nullptr : this->sinkName.c_str(), &Monitor::onSinkInfoCallback, this);
 					if (o != nullptr)
 					{
 						pa_operation_unref(o);
