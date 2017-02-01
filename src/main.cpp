@@ -18,7 +18,7 @@ int main(int argumentCount, char **arguments)
 	desc.add_options()
 		("server", po::value<std::string>()->default_value(""), "Server to connect to.")
 		("sink,s", po::value<std::string>()->default_value(""), "Sink to connect to.")
-		("duration,d", po::value<int>()->default_value(1), "Probing duration in seconds. It is the amount of time the sink's samples will be averaged.")
+		("timeout,t", po::value<int>()->default_value(1), "Probing duration in seconds. It is the maximum amount of time before the program will return a non-zero value if no sample could be probed.")
 		("help,h", "Print this message.");
 
 	// Parse command line.
@@ -41,14 +41,12 @@ int main(int argumentCount, char **arguments)
 	Monitor monitor(mainloopApi, vm["server"].as<string>(), vm["sink"].as<string>());
 	pa_threaded_mainloop_start(mainloop.get());
 
-	int duration = vm["duration"].as<int>();
+	int duration = vm["timeout"].as<int>();
 	do
 	{
 		sleep(0.01);
 	}
-	while((clock() - startTime)/CLOCKS_PER_SEC < duration);
+	while((clock() - startTime)/CLOCKS_PER_SEC < duration && !monitor.hasSamples());
 	
-	cout << "Average level: " << monitor.getAverageLevel() << endl;
-
-	return 0;
+	return monitor.hasSamples() ? 0 : 1;
 };

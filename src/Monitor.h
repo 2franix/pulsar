@@ -10,9 +10,12 @@ namespace Pulsar
 			Monitor(pa_mainloop_api *api, const std::string &serverName, const std::string &sinkName);
 
 		public:
-			int16_t getAverageLevel() const
+			bool hasSamples() const {return this->sampleCount > 0;}
+
+			size_t getSampleCount() const
 			{
-				return (this->chunkCount > 0 ? this->chunkSum / (double)this->chunkCount : 0) / (double)INT16_MAX;}
+				return this->sampleCount;
+			}
 
 		private:
 			void onContextStateChanged(pa_context *context);
@@ -31,7 +34,6 @@ namespace Pulsar
 			pa_context *context;
 
 			PulseAudio::Pointer<pa_stream> stream;
-			size_t chunkCount;
-			int32_t chunkSum;
+			size_t sampleCount;
 	};
 }

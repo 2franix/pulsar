@@ -4,6 +4,7 @@
 #include <memory>
 #include <functional>
 #include <iostream>
+#include <sstream>
 
 #include <pulse/thread-mainloop.h>
 #include <pulse/context.h>
@@ -15,7 +16,7 @@ using namespace std;
 namespace Pulsar
 {
 	Monitor::Monitor(pa_mainloop_api *api, const string &serverName, const string &sinkName)
-		: serverName(serverName), sinkName(sinkName), mainloopApi(api), context(nullptr), stream(nullptr, pa_stream_unref), chunkCount(0), chunkSum(0)
+		: serverName(serverName), sinkName(sinkName), mainloopApi(api), context(nullptr), stream(nullptr, pa_stream_unref), sampleCount(0)
 	{
 		this->context = pa_context_new(this->mainloopApi, Application::get().getName().c_str());
 		pa_context_set_state_callback(this->context, &Monitor::onContextStateChangedCallback, this);
@@ -25,13 +26,12 @@ namespace Pulsar
 
 	void Monitor::onContextStateChanged(pa_context *context)
 	{
-		cout << "onContextStateChanged" << endl;
 		pa_context_state_t state = pa_context_get_state(context);
 		switch (state)
 		{
 			case PA_CONTEXT_READY:
 				{
-					cout << "Pulseaudio connection ready..." << endl;
+					Application::get().printInfo("Pulseaudio connection ready...");
 					// Connected to Pulseaudio. Now request that sink_info_cb
 					// be called with information about the available sinks.
 					pa_operation *o = pa_context_get_sink_info_by_name(context, this->sinkName.empty() ? nullptr : this->sinkName.c_str(), &Monitor::onSinkInfoCallback, this);
@@ -41,37 +41,37 @@ namespace Pulsar
 					}
 					else
 					{
-						cout << "Failed to get sink info." << endl;
+						Application::get().printError("Failed to get sink info.");
 					}
 				}
 				break;
 
 			case PA_CONTEXT_FAILED:
-				cout << "Connection failed" << endl;
+				Application::get().printInfo("Connection failed");
 				break;
 
 			case PA_CONTEXT_UNCONNECTED:
-				cout << "Context unconnected" << endl;
+				Application::get().printInfo("Context unconnected");
 				break;
 
 			case PA_CONTEXT_CONNECTING:
-				cout << "Context connecting" << endl;
+				Application::get().printInfo("Context connecting");
 				break;
 
 			case PA_CONTEXT_AUTHORIZING:
-				cout << "Context authorizing" << endl;
+				Application::get().printInfo("Context authorizing");
 				break;
 
 			case PA_CONTEXT_TERMINATED:
-				cout << "Connection terminated" << endl;
+				Application::get().printInfo("Connection terminated");
 				break;
 
 			case PA_CONTEXT_SETTING_NAME:
-				cout << "Connection setting name" << endl;
+				Application::get().printInfo("Connection setting name");
 				break;
 
 			default:
-				cout << "Unhandled state for context." << endl;
+				Application::get().printWarning("Unhandled state for context.");
 				break;
 		}
 	}
@@ -88,13 +88,8 @@ namespace Pulsar
 
 	void Monitor::onStreamRead(size_t byteCount)
 	{
-		if (byteCount == 0)
+		if (byteCount != 0)
 		{
-			cout << "Monitor::onStreamRead, no data." << endl;
-		}
-		else
-		{
-			cout << "Monitor::onStreamRead, " << byteCount << " bytes." << endl;
 			const void *data = nullptr;
 			size_t readByteCount;
 			pa_stream_peek(this->stream.get(), &data, &readByteCount);
@@ -102,13 +97,14 @@ namespace Pulsar
 			{
 				const int16_t *dataChunks = reinterpret_cast<const int16_t*>(data);
 				const size_t currentChunkCount = readByteCount / 2;
-				cout << currentChunkCount << " chunks." << endl;
 				for (size_t chunkIx = 0; chunkIx < currentChunkCount; ++chunkIx)
 				{
 					int16_t chunk = dataChunks[chunkIx];				
-					this->chunkSum += abs(chunk);
+					if (chunk != 0)
+					{
+						this->sampleCount += 1;
+					}
 				}
-				this->chunkCount += currentChunkCount;
 			}
 				
 			pa_stream_drop(this->stream.get());
@@ -122,11 +118,12 @@ namespace Pulsar
 
 	void Monitor::onSinkInfo(const pa_sink_info *info)
 	{
-		cout << "onSinkInfo" << endl;
 		if (info == nullptr) return;
-        cout << "index:" << info->index << endl;
-		cout << "name" << info->name << endl;
-        cout << "description" << info->description << endl;
+		ostringstream str;
+		str << "index:" << info->index << endl;
+		str << "name" << info->name << endl;
+        str << "description" << info->description << endl;
+		Application::get().printInfo(str.str());
 
 		// Create stream to listen to the queried sink.
 		pa_sample_spec spec;
