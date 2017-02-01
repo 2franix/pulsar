@@ -18,7 +18,7 @@ int main(int argumentCount, char **arguments)
 	desc.add_options()
 		("server", po::value<std::string>()->default_value(""), "Server to connect to.")
 		("sink,s", po::value<std::string>()->default_value(""), "Sink to connect to.")
-		("timeout,t", po::value<int>()->default_value(1), "Probing duration in seconds. It is the maximum amount of time before the program will return a non-zero value if no sample could be probed.")
+		("timeout,t", po::value<double>()->default_value(0.5), "Probing duration in seconds. It is the maximum amount of time before the program will return a non-zero value if no sample could be probed.")
 		("help,h", "Print this message.");
 
 	// Parse command line.
@@ -41,12 +41,12 @@ int main(int argumentCount, char **arguments)
 	Monitor monitor(mainloopApi, vm["server"].as<string>(), vm["sink"].as<string>());
 	pa_threaded_mainloop_start(mainloop.get());
 
-	int duration = vm["timeout"].as<int>();
+	double duration = vm["timeout"].as<double>();
 	do
 	{
 		sleep(0.01);
 	}
-	while((clock() - startTime)/CLOCKS_PER_SEC < duration && !monitor.hasSamples());
+	while((double)(clock() - startTime)/(double)CLOCKS_PER_SEC < duration && !monitor.hasSamples());
 	
 	return monitor.hasSamples() ? 0 : 1;
 };
