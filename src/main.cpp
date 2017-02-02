@@ -11,6 +11,13 @@ using namespace std;
 using namespace Pulsar;
 namespace po = boost::program_options;
 
+double getTime()
+{
+	timespec time;
+	clock_gettime(CLOCK_MONOTONIC, &time);
+	return time.tv_sec + (double)time.tv_nsec/1e9;
+}
+
 int main(int argumentCount, char **arguments)
 {
 	// Declare command line options.
@@ -31,7 +38,7 @@ int main(int argumentCount, char **arguments)
 		return 0;
 	}
 
-	clock_t startTime = clock();
+	double startTime = getTime();
 
 	// Start mainloop.
 	PulseAudio::Pointer<pa_threaded_mainloop> mainloop(pa_threaded_mainloop_new(), pa_threaded_mainloop_free);
@@ -44,9 +51,11 @@ int main(int argumentCount, char **arguments)
 	double duration = vm["timeout"].as<double>();
 	do
 	{
-		sleep(0.01);
+		sleep(0.1);
 	}
-	while((double)(clock() - startTime)/(double)CLOCKS_PER_SEC < duration && !monitor.hasSamples());
+	while(getTime() - startTime < duration && !monitor.hasSamples());
+
+	pa_threaded_mainloop_stop(mainloop.get());
 	
 	return monitor.hasSamples() ? 0 : 1;
 };
