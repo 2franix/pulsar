@@ -28,6 +28,7 @@ int main(int argumentCount, char **arguments)
 		("sink,s", po::value<std::string>()->default_value(""), "Sink to connect to.")
 		("timeout,t", po::value<double>()->default_value(0.5), "Probing duration in seconds. It is the maximum amount of time before the program will return a non-zero value if no sample could be probed.")
 		("verbosity,v", po::value<string>()->default_value("error"), "Verbose mode. Value must be in [info, warning, error].")
+		("version", "Print version of this program.")
 		("help,h", "Print this message.");
 
 	// Parse command line.
@@ -52,6 +53,11 @@ int main(int argumentCount, char **arguments)
 		throw "Invalid verbosity level.";
 	}
 	Application::get().setLogLevel(logLevel);
+
+	if (vm.count("version") > 0)
+	{
+		cout << Application::get().getVersion() << endl;
+	}
 
 	if (vm.count("help") > 0)
 	{

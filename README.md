@@ -5,12 +5,18 @@ It is used to probe samples that are output by a sink. The process returns 0 (su
 
 It is aimed at being used as a atomic utility in a more complex script. 
 
-Example:
+# Installation
+Download latest version [here](https://github.com/2franix/pulsar/archive/1.0.0b.zip)
+Unzip archive
+In the root directory of the inflated archive, run `./configure && make install`
+
+# Example
 ```
 pulsar && echo "Default Pulseaudio server's default sink is playing sound!"
 ```
 
-Command line options:
+# Command line options
+Allowed options:
 ```
   --server arg                    Server to connect to.
   -s [ --sink ] arg               Sink to connect to.

@@ -23,6 +23,8 @@ namespace Pulsar
 			
 			const std::string &getName() const {return this->name;}
 
+			const std::string &getVersion() const {static std::string version="1.0.0b"; return version;}
+
 			void setLogLevel(LogLevel level) {this->logLevel = level;}
 	 		void printInfo(const std::string &message) {this->printMessage(LogLevel::Info, message);}
 	 		void printError(const std::string &message) {this->printMessage(LogLevel::Error, message);}
