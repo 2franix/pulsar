@@ -120,9 +120,11 @@ namespace Pulsar
 	{
 		if (info == nullptr) return;
 		ostringstream str;
-		str << "index:" << info->index << endl;
-		str << "name" << info->name << endl;
-        str << "description" << info->description << endl;
+		str << "Sink is: {";
+	   	str << "index:" << info->index;
+		str << ", name:" << info->name;
+        str << ", description:" << info->description;
+	    str << "}" << endl;
 		Application::get().printInfo(str.str());
 
 		// Create stream to listen to the queried sink.

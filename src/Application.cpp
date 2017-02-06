@@ -7,7 +7,7 @@ using namespace std;
 namespace Pulsar
 {
 	Application::Application()
-		: name("Pulsar"), logLevel(LogLevel::Info)
+		: name("Pulsar"), logLevel(LogLevel::Error)
 	{
 	}
 
