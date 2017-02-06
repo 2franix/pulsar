@@ -47,7 +47,7 @@ namespace Pulsar
 				break;
 
 			case PA_CONTEXT_FAILED:
-				Application::get().printInfo("Connection failed");
+				Application::get().printError("Connection failed");
 				break;
 
 			case PA_CONTEXT_UNCONNECTED:
