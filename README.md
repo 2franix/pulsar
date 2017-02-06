@@ -6,9 +6,9 @@ It is used to probe samples that are output by a sink. The process returns 0 (su
 It is aimed at being used as a atomic utility in a more complex script. 
 
 # Installation
-Download latest version [here](https://github.com/2franix/pulsar/archive/1.0.0b.zip)
-Unzip archive
-In the root directory of the inflated archive, run `./configure && make install`
+* Download latest version [here](https://github.com/2franix/pulsar/archive/1.0.0b.zip)
+* Unzip archive
+* In the root directory of the inflated archive, run `./configure && make install`
 
 # Example
 ```
