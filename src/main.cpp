@@ -77,7 +77,7 @@ int main(int argumentCount, char **arguments)
 	double startTime = getTime();
 	do
 	{
-		sleep(0.1);
+		sleep(1);
 	}
 	while(getTime() - startTime < duration && !monitor.hasSamples());
 
