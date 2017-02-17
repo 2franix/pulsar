@@ -16,12 +16,12 @@ using namespace std;
 namespace Pulsar
 {
 	Monitor::Monitor(pa_mainloop_api *api, const string &serverName, const string &sinkName)
-		: serverName(serverName), sinkName(sinkName), mainloopApi(api), context(nullptr), stream(nullptr, pa_stream_unref), sampleCount(0)
+		: serverName(serverName), sinkName(sinkName), mainloopApi(api),
+	   context(nullptr, pa_context_unref), stream(nullptr, pa_stream_unref), sampleCount(0)
 	{
-		this->context = pa_context_new(this->mainloopApi, Application::get().getName().c_str());
-		pa_context_set_state_callback(this->context, &Monitor::onContextStateChangedCallback, this);
-		pa_context_connect(this->context, this->serverName.empty() ? nullptr : this->serverName.c_str(), PA_CONTEXT_NOAUTOSPAWN, nullptr);
-		//pa_context_connect(this->context, nullptr, (pa_context_flags_t)0, nullptr);
+		this->context.reset(pa_context_new(this->mainloopApi, Application::get().getName().c_str()));
+		pa_context_set_state_callback(this->context.get(), &Monitor::onContextStateChangedCallback, this);
+		pa_context_connect(this->context.get(), this->serverName.empty() ? nullptr : this->serverName.c_str(), PA_CONTEXT_NOAUTOSPAWN, nullptr);
 	}
 
 	void Monitor::onContextStateChanged(pa_context *context)
@@ -132,7 +132,7 @@ namespace Pulsar
 		spec.channels = 2;
 		spec.format = PA_SAMPLE_S16LE;
 		spec.rate = 44100;
-		this->stream.reset(pa_stream_new(this->context, "Pulsar VU-meter", &spec, nullptr));
+		this->stream.reset(pa_stream_new(this->context.get(), "Pulsar VU-meter", &spec, nullptr));
 		pa_stream_set_read_callback(this->stream.get(), &Monitor::onStreamReadCallback, this);
 
 		pa_stream_connect_record(this->stream.get(), info->monitor_source_name, nullptr, PA_STREAM_PEAK_DETECT);

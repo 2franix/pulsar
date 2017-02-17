@@ -31,7 +31,7 @@ namespace Pulsar
 			pa_mainloop_api *mainloopApi;
 
 			/** Connection to the PA server. */
-			pa_context *context;
+			PulseAudio::Pointer<pa_context> context;
 
 			PulseAudio::Pointer<pa_stream> stream;
 			size_t sampleCount;
