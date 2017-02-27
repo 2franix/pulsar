@@ -1,1 +1,6 @@
 language: cpp
+addons:
+    apt:
+        packages:
+            - libpulse-dev
+            - libpulse-mainloop-glib0
