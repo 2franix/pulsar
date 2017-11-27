@@ -5,3 +5,4 @@ addons:
             - automake
             - libpulse-dev
             - libpulse-mainloop-glib0
+            - libboost-program-options-dev 
