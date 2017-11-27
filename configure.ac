@@ -7,7 +7,7 @@ AC_CONFIG_FILES([
 				 src/Makefile
 				 ])
 AC_CONFIG_MACRO_DIR([m4])
-PKG_CHECK_MODULES([PULSE], [libpulse >= 5],
+PKG_CHECK_MODULES([PULSE], [libpulse],
 				  [AC_SUBST(PULSE_CFLAGS) AC_SUBST(PULSE_LIBS)])
 
 AX_BOOST_BASE
