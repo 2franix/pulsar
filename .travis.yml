@@ -2,5 +2,6 @@ language: cpp
 addons:
     apt:
         packages:
+            - automake
             - libpulse-dev
             - libpulse-mainloop-glib0
