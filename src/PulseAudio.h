@@ -6,6 +6,7 @@
 #include "pulse/stream.h"
 
 #include <memory>
+#include <functional>
 
 
 namespace Pulsar
