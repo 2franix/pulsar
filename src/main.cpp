@@ -1,5 +1,6 @@
 #include <iostream>
-#include <ctime>
+#include <chrono>
+#include <thread>
 
 #include "unistd.h"
 
@@ -74,11 +75,11 @@ int main(int argumentCount, char **arguments)
 
 	double duration = vm["timeout"].as<double>();
 	double startTime = getTime();
-	do
-	{
-		sleep(1);
-	}
+
 	while(getTime() - startTime < duration && !monitor.hasSamples());
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	}
 
 	pa_threaded_mainloop_stop(mainloop.get());
 	
