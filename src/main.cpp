@@ -26,7 +26,7 @@ int main(int argumentCount, char **arguments)
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("server", po::value<std::string>()->default_value(""), "Server to connect to.")
-		("sink,s", po::value<std::string>()->default_value(""), "Sink to connect to.")
+		("sinks,s", po::value<std::vector<std::string>>()->multitoken(), "Sinks to connect to.")
 		("timeout,t", po::value<double>()->default_value(0.5), "Probing duration in seconds. It is the maximum amount of time before the program will return a non-zero value if no sample could be probed.")
 		("verbosity,v", po::value<string>()->default_value("error"), "Verbose mode. Value must be in [info, warning, error].")
 		("version", "Print version of this program.")
@@ -70,18 +70,40 @@ int main(int argumentCount, char **arguments)
 	PulseAudio::Pointer<pa_threaded_mainloop> mainloop(pa_threaded_mainloop_new(), pa_threaded_mainloop_free);
 	pa_mainloop_api *mainloopApi = pa_threaded_mainloop_get_api(mainloop.get());
 
-	Monitor monitor(mainloopApi, vm["server"].as<string>(), vm["sink"].as<string>());
+	std::vector<string> sinkNames;
+	if (vm.count("sinks"))
+	{
+		sinkNames = vm["sinks"].as<vector<string>>();
+	}
+	else
+	{
+		sinkNames.push_back("");
+	}
+
+	list<shared_ptr<Monitor>> monitors;
+	for(const string &sinkName : sinkNames)
+	{
+		monitors.push_back(make_shared<Monitor>(mainloopApi, vm["server"].as<string>(), sinkName));
+	}
 	pa_threaded_mainloop_start(mainloop.get());
 
 	double duration = vm["timeout"].as<double>();
 	double startTime = getTime();
 
-	while(getTime() - startTime < duration && !monitor.hasSamples());
+	while(getTime() - startTime < duration &&
+		std::none_of(monitors.begin(), monitors.end(), [](const shared_ptr<Monitor> &monitor) {return monitor->hasSamples();}))
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
 
+	for (const shared_ptr<Monitor> &monitor : monitors)
+	{
+		string status = monitor->getSinkName() + ": ";
+		status += monitor->hasSamples() ? "is playing samples" : "is not playing samples";
+		Application::get().printInfo(status);
+	}
+
 	pa_threaded_mainloop_stop(mainloop.get());
 	
-	return monitor.hasSamples() ? 0 : 1;
+	return std::any_of(monitors.begin(), monitors.end(), [](const shared_ptr<Monitor> &monitor) {return monitor->hasSamples();}) ? 0 : 1;
 };

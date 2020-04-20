@@ -119,6 +119,7 @@ namespace Pulsar
 	void Monitor::onSinkInfo(const pa_sink_info *info)
 	{
 		if (info == nullptr) return;
+		this->sinkName = info->name;
 		ostringstream str;
 		str << "Sink is: {";
 	   	str << "index:" << info->index;

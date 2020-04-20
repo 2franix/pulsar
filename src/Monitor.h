@@ -17,6 +17,8 @@ namespace Pulsar
 				return this->sampleCount;
 			}
 
+			const std::string &getSinkName() const {return sinkName;}
+
 		private:
 			void onContextStateChanged(pa_context *context);
 			void onSinkInfo(const pa_sink_info *info);
