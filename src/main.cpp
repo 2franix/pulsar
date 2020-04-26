@@ -28,7 +28,7 @@ int main(int argumentCount, char **arguments)
 	desc.add_options()
 		("server", po::value<std::string>()->default_value(""), "Server to connect to.")
 		("sinks,s", po::value<std::vector<std::string>>()->multitoken(), "Sinks to connect to.")
-		("operator,o", po::value<std::string>()->multitoken()->default_value("or"), "Operator to apply on the different sinks for probing to succeed.")
+		("operator,o", po::value<std::string>()->multitoken()->default_value("or"), "Operator to apply on the different sinks for probing to succeed. One of {or (default), and}.")
 		("timeout,t", po::value<double>()->default_value(0.5), "Probing duration in seconds. It is the maximum amount of time before the program will return a non-zero value if no sample could be probed.")
 		("verbosity,v", po::value<string>()->default_value("error"), "Verbose mode. Value must be in [info, warning, error].")
 		("version", po::bool_switch()->default_value(false), "Print version of this program.")
@@ -119,12 +119,29 @@ int main(int argumentCount, char **arguments)
 		sampleFound = predicate(monitors);
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
-
+	
+	if (oper == "or")
+	{
+		Application::get().printInfo("The listing below only includes sinks for which samples were found. Sinks which are not listed may still have samples but since an OR operator was applied, the first sink found with samples triggered the application return.");
+	}
+	int countWithSample = 0;
 	for (const shared_ptr<Monitor> &monitor : monitors)
 	{
+		if (!monitor->hasSamples())
+		{
+			if (oper == "or") continue;
+		}
+		else
+		{
+			++countWithSample;
+		}
 		string status = monitor->getSinkName() + ": ";
 		status += monitor->hasSamples() ? "is playing samples" : "is not playing samples";
 		Application::get().printInfo(status);
+	}
+	if (countWithSample == 0)
+	{
+		Application::get().printInfo("No sinks were found playing samples.");
 	}
 
 	pa_threaded_mainloop_stop(mainloop.get());
