@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "PulseAudio.h"
 
 namespace Pulsar
