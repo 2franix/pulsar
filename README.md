@@ -1,6 +1,7 @@
 # pulsar [![Build Status](https://travis-ci.org/2franix/pulsar.svg?branch=master)](https://travis-ci.org/2franix/pulsar)
 Minimalistic CLI for monitoring a PulseAudio server.
 
+
 It is used to probe samples that are output by a sink. The process returns 0 (success) if samples could be detected before timeout is reached.
 
 It is aimed at being used as a atomic utility in a more complex script. 
